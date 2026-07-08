@@ -17,6 +17,12 @@ def repondre_fireworks(question: str, modele: str) -> str:
     if not api_key or not base_url:
         return "[ERROR] Missing Fireworks API key or base URL. Check environment variables."
     
+    # Normalisation : accepte les URL avec ou sans /v1 à la fin
+    # (évite le doublon /v1/v1 qui provoque une erreur 404)
+    base_url = base_url.rstrip("/")
+    if base_url.endswith("/v1"):
+        base_url = base_url[:-3].rstrip("/")
+    
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
