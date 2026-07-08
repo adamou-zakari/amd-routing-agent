@@ -4,20 +4,18 @@ import os
 import requests
 from dotenv import load_dotenv
 
-# Charge les variables du fichier .env dès que ce fichier est importé
 load_dotenv()
 
 def repondre_fireworks(question: str, modele: str) -> str:
     """
     Appelle Fireworks AI avec le modèle spécifié.
-    Utilise les variables d'environnement FIREWORKS_API_KEY et FIREWORKS_BASE_URL.
     """
     
     api_key = os.environ.get("FIREWORKS_API_KEY")
     base_url = os.environ.get("FIREWORKS_BASE_URL")
     
     if not api_key or not base_url:
-        return "[ERREUR] Clé API ou URL Fireworks non trouvée. Vérifie ton fichier .env"
+        return "[ERROR] Missing Fireworks API key or base URL. Check environment variables."
     
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -27,10 +25,13 @@ def repondre_fireworks(question: str, modele: str) -> str:
     payload = {
         "model": modele,
         "messages": [
-            {"role": "system", "content": "You are a helpful assistant that answers questions precisely and concisely."},
+            {
+                "role": "system",
+                "content": "You are a helpful assistant. Always respond in English. Give a direct, clean, final answer only. Do not show your reasoning process, do not think out loud, and do not include phrases like 'Let's implement' or 'We need to'. Just provide the complete, correct answer immediately."
+            },
             {"role": "user", "content": question}
         ],
-        "max_tokens": 200
+        "max_tokens": 300
     }
     
     url_complete = f"{base_url}/v1/chat/completions"
@@ -51,11 +52,11 @@ def repondre_fireworks(question: str, modele: str) -> str:
         return reponse_texte
         
     except requests.exceptions.Timeout:
-        return "[ERREUR] La requête Fireworks a expiré (30 secondes)"
+        return "[ERROR] Fireworks request timed out (30 seconds)"
     except requests.exceptions.RequestException as e:
         detail = ""
         if hasattr(e, 'response') and e.response is not None:
-            detail = f" | Détail serveur : {e.response.text}"
-        return f"[ERREUR Fireworks] URL appelée : {url_complete} | Problème : {str(e)}{detail}"
+            detail = f" | Server detail: {e.response.text}"
+        return f"[ERROR Fireworks] URL: {url_complete} | Problem: {str(e)}{detail}"
     except Exception as e:
-        return f"[ERREUR Fireworks] {str(e)}"
+        return f"[ERROR Fireworks] {str(e)}"
