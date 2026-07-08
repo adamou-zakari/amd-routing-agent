@@ -7,21 +7,44 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def _nettoyer_reponse(texte: str) -> str:
-    """
-    Post-traitement : si la réponse contient un bloc de code markdown,
-    on extrait uniquement le code (élimine le raisonnement parasite
-    et les balises ```).
-    """
+def _contrainte_mots(question: str):
+    """Détecte 'exactly N words' / 'in N words' dans la tâche."""
+    m = re.search(r"(?:exactly|in)\s+(\d+)\s+words", question, re.IGNORECASE)
+    return int(m.group(1)) if m else None
+
+def _nettoyer_reponse(texte: str, question: str = "") -> str:
+    """Retire <think>, extrait le code des balises, gère les fuites de raisonnement
+    et applique les contraintes de nombre de mots de façon déterministe."""
+    texte = re.sub(r"<think>.*?</think>", "", texte, flags=re.DOTALL).strip()
+    
     blocs = re.findall(r"```(?:python|\w+)?\s*\n(.*?)```", texte, re.DOTALL)
     if blocs:
         return blocs[0].strip()
+    
+    limite = _contrainte_mots(question)
+    
+    # Fuite de raisonnement (le modèle pense à voix haute) :
+    # on récupère la dernière proposition entre guillemets
+    marqueurs = ("Let me", "The user wants", "Try:", "Count:")
+    if any(m in texte for m in marqueurs):
+        candidats = re.findall(r'"([^"]{20,300})"', texte)
+        if candidats:
+            if limite:
+                exacts = [c for c in candidats if len(c.split()) == limite]
+                texte = exacts[-1] if exacts else candidats[-1]
+            else:
+                texte = candidats[-1]
+    
+    # Application stricte de la contrainte de mots
+    if limite:
+        mots = texte.split()
+        if len(mots) > limite:
+            texte = " ".join(mots[:limite]).rstrip(",;:") + "."
+    
     return texte.strip()
 
 def repondre_fireworks(question: str, modele: str) -> str:
-    """
-    Appelle Fireworks AI avec le modèle spécifié.
-    """
+    """Appelle Fireworks AI avec le modèle spécifié."""
     
     api_key = os.environ.get("FIREWORKS_API_KEY")
     base_url = os.environ.get("FIREWORKS_BASE_URL")
@@ -29,8 +52,6 @@ def repondre_fireworks(question: str, modele: str) -> str:
     if not api_key or not base_url:
         return "[ERROR] Missing Fireworks API key or base URL. Check environment variables."
     
-    # Normalisation : accepte les URL avec ou sans /v1 à la fin
-    # (évite le doublon /v1/v1 qui provoque une erreur 404)
     base_url = base_url.rstrip("/")
     if base_url.endswith("/v1"):
         base_url = base_url[:-3].rstrip("/")
@@ -54,19 +75,18 @@ def repondre_fireworks(question: str, modele: str) -> str:
                     "For named entity recognition: list each entity with its type. "
                     "For code debugging: briefly state what the bug is, then provide the complete corrected code. "
                     "For code generation: provide the complete working code only. "
-                    "For summaries: strictly respect the exact length or format constraint given in the task. "
+                    "For summaries with a word or sentence limit: write ONE good summary close to the limit and stop. Do not count words out loud, do not revise repeatedly, never show drafts. "
                     "Never invent information. Double-check math before answering."
                 )
             },
             {"role": "user", "content": question}
         ],
-        "max_tokens": 900,
+        "max_tokens": 1500,
         "temperature": 0
     }
     
     url_complete = f"{base_url}/v1/chat/completions"
     
-    # 2 tentatives, timeout 30s (règle du hackathon : réponse < 30s par requête)
     for tentative in range(2):
         try:
             reponse = requests.post(
@@ -77,12 +97,22 @@ def repondre_fireworks(question: str, modele: str) -> str:
             )
             reponse.raise_for_status()
             data = reponse.json()
-            reponse_texte = data["choices"][0]["message"]["content"].strip()
-            return _nettoyer_reponse(reponse_texte)
+            message = data["choices"][0].get("message", {})
+            contenu = message.get("content")
+            
+            if not contenu or not contenu.strip():
+                if tentative < 1:
+                    payload["max_tokens"] = 3000
+                    continue
+                contenu = message.get("reasoning_content") or ""
+                if not contenu.strip():
+                    return "[ERROR] Empty model response"
+            
+            return _nettoyer_reponse(contenu.strip(), question)
             
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
             if tentative < 1:
-                continue  # on réessaie une fois
+                continue
             return f"[ERROR] Fireworks connection failed after 2 attempts: {str(e)}"
         except requests.exceptions.RequestException as e:
             detail = ""
