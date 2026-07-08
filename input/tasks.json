@@ -1,0 +1,14 @@
+[
+  {
+    "task_id": "t1",
+    "prompt": "Quelle est la capitale du Niger ?"
+  },
+  {
+    "task_id": "t2",
+    "prompt": "Corrige ce bug : def add(a, b) return a+b"
+  },
+  {
+    "task_id": "t3",
+    "prompt": "Explique-moi les implications économiques de la BCEAO sur l'inflation"
+  }
+]

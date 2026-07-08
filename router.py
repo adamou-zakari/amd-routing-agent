@@ -1,71 +1,67 @@
 # router.py
-# Ce fichier contient le "cerveau" qui décide si une question 
-# est FACILE (→ modèle local gratuit) ou DIFFICILE (→ modèle distant payant)
-
-
-def question_est_simple(question: str) -> bool:
-    """
-    Vérifie si une question est clairement simple malgré la présence de mots complexes.
-    Exemples : "Pourquoi il pleut ?" → True (simple)
-              "Pourquoi l'inflation augmente-t-elle au Niger ?" → False (complexe)
-    """
-    # Si la question est très courte (moins de 6 mots), on la considère simple
-    if len(question.split()) <= 5:
-        return True
-    
-    # Mots qui indiquent une question réellement complexe
-    vrais_mots_complexes = [
-        "économie", "inflation", "stratégie", "analyse",
-        "comparer", "théorie", "mécanisme", "implication"
-    ]
-    
-    # Si un vrai mot complexe est présent ET que la question fait plus de 5 mots
-    for mot in vrais_mots_complexes:
-        if mot in question.lower():
-            return False
-    
-    return True
-
+# Décide FACILE/DIFFICILE (pour tes tests locaux)
+# ET détecte si la tâche est du CODE (pour choisir le bon modèle Fireworks)
 
 def classifier_difficulte(question: str) -> str:
-    """
-    Cette fonction reçoit une question (texte) 
-    et retourne soit "FACILE" soit "DIFFICILE".
-    """
-    
+    """Utilisé en développement local uniquement (ne compte pas dans le score)."""
+    score = 0
     nb_mots = len(question.split())
     
-    # D'abord, on vérifie si la question est clairement simple
-    if question_est_simple(question):
-        return "FACILE"
+    if nb_mots > 20:
+        score += 2
+    elif nb_mots > 10:
+        score += 1
     
-    # Liste de mots qui indiquent souvent une question complexe.
-    mots_complexes = [
-        "pourquoi", "explique", "analyse", 
-        "compare", "implications", "stratégie"
+    mots_forts = ["analyse", "compare", "stratégie", "implications", "démontre", "évalue", "conçois"]
+    for mot in mots_forts:
+        if mot in question.lower():
+            score += 2
+    
+    mots_moyens = ["pourquoi", "explique", "comment"]
+    for mot in mots_moyens:
+        if mot in question.lower():
+            score += 1
+    
+    if question.count("?") > 1:
+        score += 2
+    
+    return "DIFFICILE" if score >= 3 else "FACILE"
+
+
+def est_tache_code(question: str) -> bool:
+    """
+    Détecte si la question concerne du CODE.
+    Si oui -> on utilise Kimi K2.7 Code (spécialisé, plus cher)
+    Si non -> on utilise Minimax M3 (généraliste, moins cher)
+    """
+    mots_code = [
+        "code", "fonction", "python", "javascript", "bug", "debug",
+        "erreur", "compile", "programme", "script", "algorithme",
+        "classe", "variable", "syntax", "def ", "function", "class "
     ]
-    
-    # On vérifie si un mot complexe est présent dans la question.
-    contient_mot_complexe = any(
-        mot in question.lower() for mot in mots_complexes
-    )
-    
-    # RÈGLE DE DÉCISION :
-    if nb_mots > 15 or contient_mot_complexe:
-        return "DIFFICILE"
+    question_lower = question.lower()
+    return any(mot in question_lower for mot in mots_code)
+
+
+def choisir_modele(question: str) -> str:
+    """
+    LA vraie fonction de routage qui compte pour le score du hackathon.
+    Retourne le nom complet du modèle Fireworks à utiliser.
+    """
+    if est_tache_code(question):
+        return "accounts/fireworks/models/kimi-k2p7-code"
     else:
-        return "FACILE"
+        return "accounts/fireworks/models/minimax-m3"
 
 
-# Zone de test
 if __name__ == "__main__":
     tests = [
         "Quelle est la capitale du Niger ?",
-        "Explique-moi les implications économiques de la BCEAO sur l'inflation",
-        "Salut",
-        "Pourquoi il pleut aujourd'hui ?",
-        "Pourquoi l'inflation augmente-t-elle au Niger ?"
+        "Corrige ce bug dans ma fonction Python",
+        "Explique-moi les implications économiques de la BCEAO",
+        "Écris une fonction qui trie une liste",
     ]
-    
-    for test in tests:
-        print(f"'{test}' → {classifier_difficulte(test)}")
+    for t in tests:
+        print(f"'{t}'")
+        print(f"  → Difficulté (dev only) : {classifier_difficulte(t)}")
+        print(f"  → Modèle choisi : {choisir_modele(t)}\n")

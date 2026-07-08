@@ -9,7 +9,7 @@ load_dotenv()
 
 def repondre_fireworks(question: str, modele: str) -> str:
     """
-    Appelle Fireworks AI avec le modèle spécifié pour les questions complexes.
+    Appelle Fireworks AI avec le modèle spécifié.
     Utilise les variables d'environnement FIREWORKS_API_KEY et FIREWORKS_BASE_URL.
     """
     
