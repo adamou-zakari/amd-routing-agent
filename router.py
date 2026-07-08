@@ -1,39 +1,14 @@
 # router.py
-# Décide FACILE/DIFFICILE (pour tes tests locaux)
-# ET détecte si la tâche est du CODE (pour choisir le bon modèle Fireworks)
+import os
 
-def classifier_difficulte(question: str) -> str:
-    """Utilisé en développement local uniquement (ne compte pas dans le score)."""
-    score = 0
-    nb_mots = len(question.split())
-    
-    if nb_mots > 20:
-        score += 2
-    elif nb_mots > 10:
-        score += 1
-    
-    mots_forts = ["analyse", "compare", "stratégie", "implications", "démontre", "évalue", "conçois"]
-    for mot in mots_forts:
-        if mot in question.lower():
-            score += 2
-    
-    mots_moyens = ["pourquoi", "explique", "comment"]
-    for mot in mots_moyens:
-        if mot in question.lower():
-            score += 1
-    
-    if question.count("?") > 1:
-        score += 2
-    
-    return "DIFFICILE" if score >= 3 else "FACILE"
+def _modeles_autorises() -> list:
+    """Lit la liste des modèles depuis ALLOWED_MODELS (injectée par le harnais)."""
+    raw = os.environ.get("ALLOWED_MODELS", "")
+    return [m.strip() for m in raw.split(",") if m.strip()]
 
 
 def est_tache_code(question: str) -> bool:
-    """
-    Détecte si la question concerne du CODE.
-    Si oui -> on utilise Kimi K2.7 Code (spécialisé, plus cher)
-    Si non -> on utilise Minimax M3 (généraliste, moins cher)
-    """
+    """Détecte si la question concerne du CODE."""
     mots_code = [
         "code", "fonction", "python", "javascript", "bug", "debug",
         "erreur", "compile", "programme", "script", "algorithme",
@@ -45,23 +20,24 @@ def est_tache_code(question: str) -> bool:
 
 def choisir_modele(question: str) -> str:
     """
-    LA vraie fonction de routage qui compte pour le score du hackathon.
-    Retourne le nom complet du modèle Fireworks à utiliser.
+    Routage conforme aux règles : les IDs viennent de ALLOWED_MODELS.
+    Fallback sur les IDs complets uniquement en dev local (variable absente).
     """
-    if est_tache_code(question):
-        return "accounts/fireworks/models/kimi-k2p7-code"
-    else:
+    modeles = _modeles_autorises()
+    
+    if not modeles:
+        # Dev local uniquement (ALLOWED_MODELS non défini)
+        if est_tache_code(question):
+            return "accounts/fireworks/models/kimi-k2p7-code"
         return "accounts/fireworks/models/minimax-m3"
-
-
-if __name__ == "__main__":
-    tests = [
-        "Quelle est la capitale du Niger ?",
-        "Corrige ce bug dans ma fonction Python",
-        "Explique-moi les implications économiques de la BCEAO",
-        "Écris une fonction qui trie une liste",
-    ]
-    for t in tests:
-        print(f"'{t}'")
-        print(f"  → Difficulté (dev only) : {classifier_difficulte(t)}")
-        print(f"  → Modèle choisi : {choisir_modele(t)}\n")
+    
+    if est_tache_code(question):
+        for m in modeles:
+            if "kimi" in m.lower() or "code" in m.lower():
+                return m
+    
+    for m in modeles:
+        if "minimax" in m.lower():
+            return m
+    
+    return modeles[0]

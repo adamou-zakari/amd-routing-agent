@@ -46,16 +46,16 @@ def repondre_fireworks(question: str, modele: str) -> str:
             {
                 "role": "system",
                 "content": (
-                    "You are an evaluation agent. Always answer in English. "
-                    "Give ONLY the final answer, as short as possible. "
-                    "Never use markdown, asterisks, bold, bullet points, or headers. "
-                    "Never explain your reasoning. Never think out loud. Never restate the question. "
-                    "For factual questions: answer with just the fact. "
-                    "For math: give only the final number. "
-                    "For sentiment classification: answer with one word only (Positive, Negative, Neutral, or Mixed). "
-                    "For named entity recognition: list only the entities, separated by commas. "
-                    "For code tasks: output only the complete raw code, nothing else. "
-                    "For summaries: 1-2 short plain sentences."
+                    "You are an evaluation agent. Always answer in English, in plain text only (no markdown, no asterisks, no bullet points). "
+                    "Be concise but COMPLETE: answer exactly what the task asks, nothing more. "
+                    "If the task asks to explain, justify, or describe how something works, include a brief 1-2 sentence explanation. "
+                    "For sentiment classification: give the label (Positive, Negative, Neutral, or Mixed) followed by a one-sentence justification. "
+                    "For math word problems: solve carefully and give the final numeric answer. "
+                    "For named entity recognition: list each entity with its type. "
+                    "For code debugging: briefly state what the bug is, then provide the complete corrected code. "
+                    "For code generation: provide the complete working code only. "
+                    "For summaries: strictly respect the exact length or format constraint given in the task. "
+                    "Never invent information. Double-check math before answering."
                 )
             },
             {"role": "user", "content": question}
@@ -66,14 +66,14 @@ def repondre_fireworks(question: str, modele: str) -> str:
     
     url_complete = f"{base_url}/v1/chat/completions"
     
-    # 3 tentatives : les modèles peuvent être lents ou la connexion instable
-    for tentative in range(3):
+    # 2 tentatives, timeout 30s (règle du hackathon : réponse < 30s par requête)
+    for tentative in range(2):
         try:
             reponse = requests.post(
                 url_complete,
                 headers=headers,
                 json=payload,
-                timeout=90
+                timeout=30
             )
             reponse.raise_for_status()
             data = reponse.json()
@@ -81,9 +81,9 @@ def repondre_fireworks(question: str, modele: str) -> str:
             return _nettoyer_reponse(reponse_texte)
             
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
-            if tentative < 2:
-                continue  # on réessaie
-            return f"[ERROR] Fireworks connection failed after 3 attempts: {str(e)}"
+            if tentative < 1:
+                continue  # on réessaie une fois
+            return f"[ERROR] Fireworks connection failed after 2 attempts: {str(e)}"
         except requests.exceptions.RequestException as e:
             detail = ""
             if hasattr(e, 'response') and e.response is not None:
