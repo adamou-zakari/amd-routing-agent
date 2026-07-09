@@ -1,12 +1,18 @@
 [
-  { "task_id": "h1", "prompt": "A company had 1,250 employees in 2023. Headcount grew 12% in 2024, then declined 8% in 2025. If it grows 15% in 2026, how many employees will it have? Round to the nearest whole number." },
-  { "task_id": "h2", "prompt": "A tank holds 480 liters. It drains at 8 liters/minute for 15 minutes, refills at 12 liters/minute for 20 minutes, then drains at 5 liters/minute for 10 minutes. How many liters are in the tank?" },
-  { "task_id": "h3", "prompt": "Classify the sentiment of this review and justify: I wanted to love this laptop. The screen is stunning and the keyboard feels premium, but it throttles under load, the fans are loud, and support ignored my emails for two weeks." },
-  { "task_id": "h4", "prompt": "Summarize the following in exactly 12 words: Solar panel adoption in West Africa has accelerated dramatically as equipment prices fell, governments introduced favorable policies, and rural communities discovered that off-grid installations could power schools, clinics, and small businesses more reliably than aging national grids." },
-  { "task_id": "h5", "prompt": "Extract all named entities with their types from: After leaving Google DeepMind in London, Dr. Amina Diallo founded SahelAI in Dakar in January 2025, securing funding from the African Development Bank." },
-  { "task_id": "h6", "prompt": "This Python function should return a list of functions that each multiply by their index, but all of them multiply by 4. Find the bug and fix it: def make_multipliers():\n    funcs = []\n    for i in range(5):\n        funcs.append(lambda x: x * i)\n    return funcs" },
-  { "task_id": "h7", "prompt": "Five people (Ana, Ben, Carl, Dana, Eli) sit in a row of 5 seats numbered 1-5. Ana sits in seat 1. Eli sits in seat 5. Ben sits immediately to the right of Carl. Dana does not sit next to Ana. Where does each person sit?" },
-  { "task_id": "h8", "prompt": "Write a Python function levenshtein(a, b) that computes the Levenshtein edit distance between two strings using dynamic programming." },
-  { "task_id": "h9", "prompt": "What is photosynthesis and why is it essential for life on Earth? Answer in 2-3 sentences." },
-  { "task_id": "h10", "prompt": "This function should merge two sorted lists into one sorted list, but sometimes loses elements. Fix it: def merge(a, b):\n    result = []\n    i = j = 0\n    while i < len(a) and j < len(b):\n        if a[i] < b[j]:\n            result.append(a[i]); i += 1\n        else:\n            result.append(b[j]); j += 1\n    return result" }
+  { "task_id": "g1", "prompt": "Explain how a blockchain achieves consensus without a central authority. Keep it brief." },
+  { "task_id": "g2", "prompt": "What is the difference between weather and climate?" },
+  { "task_id": "g3", "prompt": "An investment of $8,000 grows by 6% per year for 2 years, then loses 10% in the third year. What is its final value?" },
+  { "task_id": "g4", "prompt": "A train travels 180 km at 90 km/h, stops for 30 minutes, then travels 120 km at 60 km/h. What is the total journey time in hours?" },
+  { "task_id": "g5", "prompt": "Classify the sentiment and justify: I've used this app daily for three months. It crashes occasionally, but the features I need most work flawlessly and support responded within a day." },
+  { "task_id": "g6", "prompt": "Classify the sentiment of this review: Worst purchase I have ever made. Broke within a week and the seller refuses any refund." },
+  { "task_id": "g7", "prompt": "Summarize the following in exactly 15 words: Remote work adoption has permanently reshaped commercial real estate markets as companies downsize office footprints, convert spaces to flexible arrangements, and landlords repurpose vacant buildings into residential units, data centers, and mixed-use developments to survive." },
+  { "task_id": "g8", "prompt": "Condense this to a single sentence: The volunteers arrived at dawn. They cleared debris from the riverbank for six hours. By evening, they had removed two tons of plastic waste. Local officials praised the initiative and promised recycling bins." },
+  { "task_id": "g9", "prompt": "Extract all named entities and their types from: Before joining UNESCO in Paris, Professor Kwame Mensah taught at the University of Ghana until last September." },
+  { "task_id": "g10", "prompt": "Identify the entities and label each: The merger between Vodafone and Safaricom was announced in Nairobi on 15 March 2024 by CEO Amara Okafor." },
+  { "task_id": "g11", "prompt": "This function should return only even numbers but returns odd ones. Fix it: def get_evens(nums):\n    return [n for n in nums if n % 2 == 1]" },
+  { "task_id": "g12", "prompt": "This recursive function causes infinite recursion for some inputs. Find the bug and fix it: def factorial(n):\n    if n == 1:\n        return 1\n    return n * factorial(n - 1)" },
+  { "task_id": "g13", "prompt": "Four colleagues (Ada, Bo, Cy, Dee) each speak exactly one different language: French, Hausa, Arabic, Swahili. Ada does not speak French or Arabic. Bo speaks Hausa. Dee does not speak Swahili and does not speak Arabic. Who speaks which language?" },
+  { "task_id": "g14", "prompt": "A farmer has chickens and goats, 22 animals in total with 60 legs altogether. How many chickens and how many goats?" },
+  { "task_id": "g15", "prompt": "Write a Python function is_palindrome(s) that returns True if the string is a palindrome, ignoring case, spaces, and punctuation. No imports allowed." },
+  { "task_id": "g16", "prompt": "Write a Python function fizzbuzz(n) that returns a list of strings from 1 to n where multiples of 3 are 'Fizz', multiples of 5 are 'Buzz', and multiples of both are 'FizzBuzz'; other numbers appear as strings." }
 ]
