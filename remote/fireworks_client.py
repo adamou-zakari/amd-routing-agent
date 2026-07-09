@@ -62,7 +62,7 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
 
     url_complete = f"{base_url}/v1/chat/completions"
 
-    for tentative in range(2):  # 1 essai + 1 retry
+    for tentative in range(2):
         try:
             reponse = requests.post(
                 url_complete,
@@ -72,7 +72,23 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
             )
             reponse.raise_for_status()
             data = reponse.json()
-            return data["choices"][0]["message"]["content"].strip()
+            
+            # === EXTRACTION ULTRA-ROBUSTE AVEC FALLBACK ===
+            if "choices" in data and len(data["choices"]) > 0:
+                message = data["choices"][0].get("message", {})
+                
+                # 1. Essayer content d'abord (format standard)
+                if "content" in message and message["content"]:
+                    return message["content"].strip()
+                
+                # 2. Fallback : reasoning_content (Gemma en mode raisonnement)
+                if "reasoning_content" in message and message["reasoning_content"]:
+                    return message["reasoning_content"].strip()
+                
+                # 3. Si rien, on retourne le message complet pour debug
+                return f"[ERROR] Fireworks response structure: {message}"
+            else:
+                return f"[ERROR] Fireworks unexpected response: {data}"
 
         except requests.exceptions.Timeout:
             if tentative == 0:
