@@ -1,35 +1,35 @@
 [
   {
     "task_id": "g1",
-    "answer": "A blockchain achieves consensus without a central authority by having all participants agree on the validity of transactions through a shared protocol. When a new transaction occurs, it is broadcast to a distributed network of nodes that independently verify it against the rules of the system. These verified transactions are grouped into blocks, and nodes compete to add the next block to the chain using a consensus mechanism such as Proof of Work, where miners solve computational puzzles, or Proof of Stake, where validators are chosen based on the amount of currency they hold and are willing to lock up. Once a block is accepted by the majority of nodes, it becomes part of an immutable, shared ledger, and any attempt to alter it would require controlling more than half of the network's power or stake, which is economically and computationally impractical. This combination of decentralization, cryptographic verification, and economic incentives allows the network to maintain a single, trustworthy source of truth without relying on any trusted intermediary."
+    "answer": "Blockchain achieves consensus without a central authority by having distributed nodes agree on the validity of transactions through protocols like Proof of Work or Proof of Stake, where participants compete or are selected to propose blocks and the rest of the network verifies and accepts them based on cryptographic rules and economic incentives."
   },
   {
     "task_id": "g2",
-    "answer": "Weather refers to the short-term atmospheric conditions\u2014such as temperature, precipitation, humidity, and wind\u2014at a specific time and place, typically observed over hours or days. Climate, by contrast, is the long-term average of those weather patterns in a given region, usually calculated over 30 years or more. A common saying captures the distinction: climate is what you expect, while weather is what you get on any given day."
+    "answer": "Weather refers to the short-term atmospheric conditions in a specific place at a specific time, such as temperature, precipitation, and wind on a given day. Climate, on the other hand, is the long-term average of weather patterns in a particular region over an extended period, typically 30 years or more."
   },
   {
     "task_id": "g3",
-    "answer": "8089.92"
+    "answer": "$8,089.92. The investment grows to $8,000 \u00d7 1.06\u00b2 = $8,988.80 after two years, then decreases by 10% to $8,988.80 \u00d7 0.90 = $8,089.92."
   },
   {
     "task_id": "g4",
-    "answer": "4.5"
+    "answer": "4.5 hours. The first leg takes 180/90 = 2 hours, the stop adds 0.5 hours, and the second leg takes 120/60 = 2 hours, totaling 4.5 hours."
   },
   {
     "task_id": "g5",
-    "answer": "Positive: Mixed. The review contains both positive elements (features work flawlessly, responsive support) and a negative element (occasional crashes), so the sentiment is not uniformly positive or negative."
+    "answer": "Mixed. The review contains both positive sentiments (features work flawlessly, responsive support) and a negative sentiment (occasional crashes), with the positive aspects being more emphasized but the negative still clearly present."
   },
   {
     "task_id": "g6",
-    "answer": "Negative. The reviewer uses strong negative language (\"Worst purchase I have ever made\"), reports a product failure (\"Broke within a week\"), and complains about poor customer service (\"seller refuses any refund\")."
+    "answer": "Negative. The reviewer expresses strong dissatisfaction with both the product quality (\"Worst purchase,\" \"Broke within a week\") and the seller's customer service (\"refuses any refund\")."
   },
   {
     "task_id": "g7",
-    "answer": "Remote work reshaped commercial real estate, driving office downsizing and repurposing into residential mixed-use developments."
+    "answer": "Remote work has reshaped commercial real estate, with companies downsizing offices and landlords repurposing buildings."
   },
   {
     "task_id": "g8",
-    "answer": "Volunteers cleared two tons of plastic waste from the riverbank in a single day, earning praise from local officials who promised to install recycling bins."
+    "answer": "Volunteers cleared two tons of plastic waste from the riverbank during a six-hour effort, earning praise from local officials who promised to install recycling bins."
   },
   {
     "task_id": "g9",
@@ -45,19 +45,19 @@
   },
   {
     "task_id": "g12",
-    "answer": "The base case only catches n == 1, so calling the function with 0 or a negative number causes infinite recursion. Add a base case for 0 and reject negative inputs.\n\ndef factorial(n):\n    if n < 0:\n        raise ValueError(\"factorial is not defined for negative numbers\")\n    if n == 0 or n == 1:\n        return 1\n    return n * factorial(n - 1)"
+    "answer": "The bug is that the function lacks a base case for n == 0, so calling factorial(0) recurses into negative numbers indefinitely. It also does not guard against negative inputs.\n\ndef factorial(n):\n    if n < 0:\n        raise ValueError(\"Factorial is not defined for negative numbers\")\n    if n == 0 or n == 1:\n        return 1\n    return n * factorial(n - 1)"
   },
   {
     "task_id": "g13",
-    "answer": "Ada speaks Swahili, Bo speaks Hausa, Cy speaks Arabic, and Dee speaks French. Since Bo is assigned Hausa, Dee must take French (the only remaining option for her), which forces Ada to Swahili and leaves Cy with Arabic."
+    "answer": "Ada speaks Swahili, Bo speaks Hausa, Cy speaks Arabic, Dee speaks French. Since Bo is assigned Hausa and Dee cannot speak Swahili or Arabic, Dee must speak French; this forces Ada (who cannot speak French or Arabic) into Swahili, leaving Cy with Arabic."
   },
   {
     "task_id": "g14",
-    "answer": "14 chickens and 8 goats"
+    "answer": "The correct answer is 14 chickens and 8 goats. Setting up the equations c + g = 22 and 2c + 4g = 60 gives g = 8 and c = 14, so '8' is correct for the number of goats (with 14 chickens), while '22' is just the total animal count and not the breakdown."
   },
   {
     "task_id": "g15",
-    "answer": "def is_palindrome(s):\n    cleaned = \"\"\n    for c in s:\n        if c.isalnum():\n            cleaned += c.lower()\n    return cleaned == cleaned[::-1]"
+    "answer": "def is_palindrome(s):\n    cleaned = \"\"\n    for char in s:\n        if char.isalnum():\n            cleaned += char.lower()\n    return cleaned == cleaned[::-1]"
   },
   {
     "task_id": "g16",
