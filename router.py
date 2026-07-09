@@ -18,22 +18,25 @@ def est_tache_code(question: str) -> bool:
 
 
 def est_tache_raisonnement(question: str) -> bool:
-    """Maths multi-étapes et puzzles logiques : besoin de réflexion approfondie."""
+    """Maths multi-étapes et puzzles logiques : réflexion approfondie + vérification."""
     q = question.lower()
     mots_math = ["%", "percent", "calculate", "how many", "how much", "total",
                  "remain", "liters", "grew", "declined", "increase", "decrease",
-                 "price", "cost", "sum", "average", "rate", "years", "per "]
-    mots_logique = ["sits in", "seat", "each own", "who owns", "taller", "older",
-                    "shorter", "younger", "constraint", "puzzle", "deduce",
-                    "must be", "immediately", "next to", "logic", "exactly one"]
+                 "price", "cost", "sum", "average", "rate", "years old", "per ",
+                 "twice", "half", "ratio", "fraction", "speed", "distance",
+                 "minutes", "hours", "kg", "grams", "meters", "km", "older",
+                 "younger", "age", "profit", "discount", "interest", "legs",
+                 "animals", "grows", "loses", "value"]
+    mots_logique = ["sits in", "seat", "each own", "who owns", "taller", "shorter",
+                    "constraint", "puzzle", "deduce", "must be", "immediately",
+                    "next to", "logic", "exactly one", "finished before",
+                    "finished after", "order from", "left of", "right of",
+                    "who speaks", "each speak"]
     return any(m in q for m in mots_math + mots_logique)
 
 
 def choisir_modele(question: str):
-    """
-    Retourne (modele, mode) : mode = 'code', 'raisonnement' ou 'standard'.
-    IDs lus depuis ALLOWED_MODELS (règle du hackathon), fallback local sinon.
-    """
+    """Retourne (modele, mode) : mode = 'code', 'raisonnement' ou 'standard'."""
     modeles = _modeles_autorises()
 
     def trouver(mots_cles, defaut):
