@@ -1,10 +1,12 @@
 [
-  {"task_id": "practice-01", "prompt": "What is the capital of Australia, and what body of water is it near?"},
-  {"task_id": "practice-02", "prompt": "A store has 240 items. It sells 15% on Monday and 60 more on Tuesday. How many items remain?"},
-  {"task_id": "practice-03", "prompt": "Classify the sentiment of this review: The battery life is great, but the screen scratches too easily."},
-  {"task_id": "practice-04", "prompt": "Summarize the following in exactly one sentence: The AMD Developer Hackathon brings together thousands of builders worldwide to create AI agents using Fireworks AI and AMD infrastructure, with a total prize pool exceeding twenty thousand dollars across three distinct tracks."},
-  {"task_id": "practice-05", "prompt": "Extract all named entities and their types from: Maria Sanchez joined Fireworks AI in Berlin last March."},
-  {"task_id": "practice-06", "prompt": "This function should return the max of a list but has a bug: def get_max(nums): return nums[0]. Find and fix it."},
-  {"task_id": "practice-07", "prompt": "Three friends, Sam, Jo, and Lee, each own a different pet: cat, dog, bird. Sam does not own the bird. Jo owns the dog. Who owns the cat?"},
-  {"task_id": "practice-08", "prompt": "Write a Python function that returns the second-largest number in a list, handling duplicates correctly."}
+  { "task_id": "h1", "prompt": "A company had 1,250 employees in 2023. Headcount grew 12% in 2024, then declined 8% in 2025. If it grows 15% in 2026, how many employees will it have? Round to the nearest whole number." },
+  { "task_id": "h2", "prompt": "A tank holds 480 liters. It drains at 8 liters/minute for 15 minutes, refills at 12 liters/minute for 20 minutes, then drains at 5 liters/minute for 10 minutes. How many liters are in the tank?" },
+  { "task_id": "h3", "prompt": "Classify the sentiment of this review and justify: I wanted to love this laptop. The screen is stunning and the keyboard feels premium, but it throttles under load, the fans are loud, and support ignored my emails for two weeks." },
+  { "task_id": "h4", "prompt": "Summarize the following in exactly 12 words: Solar panel adoption in West Africa has accelerated dramatically as equipment prices fell, governments introduced favorable policies, and rural communities discovered that off-grid installations could power schools, clinics, and small businesses more reliably than aging national grids." },
+  { "task_id": "h5", "prompt": "Extract all named entities with their types from: After leaving Google DeepMind in London, Dr. Amina Diallo founded SahelAI in Dakar in January 2025, securing funding from the African Development Bank." },
+  { "task_id": "h6", "prompt": "This Python function should return a list of functions that each multiply by their index, but all of them multiply by 4. Find the bug and fix it: def make_multipliers():\n    funcs = []\n    for i in range(5):\n        funcs.append(lambda x: x * i)\n    return funcs" },
+  { "task_id": "h7", "prompt": "Five people (Ana, Ben, Carl, Dana, Eli) sit in a row of 5 seats numbered 1-5. Ana sits in seat 1. Eli sits in seat 5. Ben sits immediately to the right of Carl. Dana does not sit next to Ana. Where does each person sit?" },
+  { "task_id": "h8", "prompt": "Write a Python function levenshtein(a, b) that computes the Levenshtein edit distance between two strings using dynamic programming." },
+  { "task_id": "h9", "prompt": "What is photosynthesis and why is it essential for life on Earth? Answer in 2-3 sentences." },
+  { "task_id": "h10", "prompt": "This function should merge two sorted lists into one sorted list, but sometimes loses elements. Fix it: def merge(a, b):\n    result = []\n    i = j = 0\n    while i < len(a) and j < len(b):\n        if a[i] < b[j]:\n            result.append(a[i]); i += 1\n        else:\n            result.append(b[j]); j += 1\n    return result" }
 ]
