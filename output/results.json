@@ -1,42 +1,42 @@
 [
   {
     "task_id": "h1",
-    "answer": "**1,481 employees**\n\nStarting with 1,250, applying the changes sequentially: 1,250 \u00d7 1.12 = 1,400 (2024), then 1,400 \u00d7 0.92 = 1,288 (2025), then 1,288 \u00d7 1.15 = 1,481.2, which rounds to **1,481**."
+    "answer": "**Answer: 1,481 employees**\n\nStep-by-step:\n- **2023:** 1,250 employees\n- **2024 (+12%):** 1,250 \u00d7 1.12 = 1,400\n- **2025 (\u22128%):** 1,400 \u00d7 0.92 = 1,288\n- **2026 (+15%):** 1,288 \u00d7 1.15 = 1,481.2 \u2192 **1,481** (rounded)"
   },
   {
     "task_id": "h2",
-    "answer": "**550 liters**\n\nStarting with 480 L, draining 120 L leaves 360 L; refilling 240 L brings it to 600 L; then draining 50 L leaves 550 L."
+    "answer": "**550 liters**\n\nStep-by-step:\n- Start: 480 liters\n- Drain: 480 \u2212 (8 \u00d7 15) = 360 liters\n- Refill: 360 + (12 \u00d7 20) = 600 liters\n- Drain: 600 \u2212 (5 \u00d7 10) = 550 liters"
   },
   {
     "task_id": "h3",
-    "answer": "**Sentiment: Mixed**\n\n**Justification:**\n\nThe review contains both clearly positive and clearly negative elements, with no single dominant tone:\n\n**Positive aspects:**\n- \"The screen is stunning\" \u2014 strong praise for display quality\n- \"the keyboard feels premium\" \u2014 positive on build/feel\n- \"I wanted to love this laptop\" \u2014 shows initial enthusiasm and openness to a favorable opinion\n\n**Negative aspects:**\n- \"it throttles under load\" \u2014 performance complaint\n- \"the fans are loud"
+    "answer": "**Sentiment: Negative**\n\n**Justification:**\n\n- **Opening framing sets a disappointed tone:** \"I wanted to love this laptop\" signals that the reviewer's positive expectations were not met.\n\n- **Positives are limited and surface-level:** The praise is confined to aesthetic and tactile qualities (stunning screen, premium-feeling keyboard), which are baseline expectations rather than standout achievements.\n\n- **Criticals are substantive and multi-dimensional:** Throttling under load is a serious functional/performance flaw; loud fans"
   },
   {
     "task_id": "h4",
-    "answer": "West African solar adoption surged from falling prices, policies, and rural needs."
+    "answer": "Falling prices and policies drove West African solar adoption across off-grid communities."
   },
   {
     "task_id": "h5",
-    "answer": "**Named Entities:**\n\n- **Google DeepMind** \u2013 Organization\n- **London** \u2013 Location\n- **Dr. Amina Diallo** \u2013 Person\n- **SahelAI** \u2013 Organization\n- **Dakar** \u2013 Location\n- **January 2025** \u2013 Date\n- **African Development Bank** \u2013 Organization"
+    "answer": "Here are the named entities extracted from the sentence:\n\n| Entity | Type |\n|--------|------|\n| Google DeepMind | Organization |\n| London | Location |\n| Dr. Amina Diallo | Person |\n| SahelAI | Organization |\n| Dakar | Location |\n| January 2025 | Date/Time |\n| African Development Bank | Organization |"
   },
   {
     "task_id": "h6",
-    "answer": "def make_multipliers():\n    funcs = []\n    for i in range(5):\n        funcs.append(lambda x, i=i: x * i)\n    return funcs"
+    "answer": "The bug is late closure binding: each lambda captures the variable `i` itself, not its value at the time of creation. After the loop ends, `i` is `4`, so every function multiplies by `4`.\n\nFix by capturing the current value as a default argument:\n\n```python\ndef make_multipliers():\n    funcs = []\n    for i in range(5):\n        funcs.append(lambda x, i=i: x * i)\n    return funcs\n```"
   },
   {
     "task_id": "h7",
-    "answer": "**Seating arrangement:**\n- Seat 1: Ana\n- Seat 2: Carl\n- Seat 3: Ben\n- Seat 4: Dana\n- Seat 5: Eli\n\n**Explanation:** With Ana fixed in seat 1 and Eli in seat 5, seats 2\u20134 remain for Ben, Carl, and Dana. Ben must be immediately right of Carl, giving two options: (Carl=2, Ben=3) or (Carl=3, Ben=4). The second option forces Dana into seat 2, which is next to Ana\u2014violating the constraint. So Carl=2, Ben=3, and Dana=4 is the unique solution."
+    "answer": "**Final seating arrangement:**\n\n| Seat | 1 | 2 | 3 | 4 | 5 |\n|------|---|---|---|---|---|\n| Person | Ana | Carl | Ben | Dana | Eli |\n\n**Reasoning:**\n- Seats 2, 3, 4 remain open for Ben, Carl, and Dana.\n- \"Ben immediately right of Carl\" leaves two possibilities: (Carl-2, Ben-3) or (Carl-3, Ben-4).\n- \"Dana not next to Ana\" (seat 1) rules out Dana in seat 2.\n- The arrangement (Carl-2, Ben-3) leaves Dana in seat 4 (not adjacent to Ana) \u2713, while (Carl-3, Ben-4) forces Dana into seat 2 (adjacent to Ana) \u2717."
   },
   {
     "task_id": "h8",
-    "answer": "def levenshtein(a, b):\n    m, n = len(a), len(b)\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    for i in range(m + 1):\n        dp[i][0] = i\n    for j in range(n + 1):\n        dp[0][j] = j\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            cost = 0 if a[i - 1] == b[j - 1] else 1\n            dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost)\n    return dp[m][n]"
+    "answer": "We need answer user asks: Write Python function levenshtein(a,b) computing Levenshtein edit distance using dynamic programming. We are to be helpful assistant, respond in English, direct clean final answer only, no reasoning, no phrases like let's implement. Provide complete correct answer immediately.\n\nWe need include code. Could be simple DP with O(n*m) time and O(min(n,m)) space, but since they ask dynamic programming, a matrix version is clear. Let's write a function. Maybe include docstring and example. Need final answer only. Ensure no extra explanation? They say direct, clean, final answer only. But providing code is answer. Maybe include minimal usage. Let's produce code with O(min(n,m)) memory optimization to be efficient. However DP matrix often easier to understand. They specifically ask \"using dynamic programming\". We can give optimized DP. Let's consider which is \"complete correct\". Levenshtein distance between a and b.\n\nImplementation:\n\ndef levenshtein(a, b):\n    if len(a) < len(b):\n        a, b = b, a\n    if not b:\n        return len(a)\n    previous = list(range(len(b)+1))\n    current = [0]*(len(b)+1)\n    for i, ca in enumerate(a, 1):\n        current[0] = i\n        for j, cb in enumerate(b, 1):\n            insertion = previous[j] + 1\n            deletion = current[j"
   },
   {
     "task_id": "h9",
-    "answer": "Photosynthesis is the process by which green plants, algae, and some bacteria convert sunlight, water, and carbon dioxide into glucose and oxygen. It is essential for life on Earth because it produces the oxygen we breathe and forms the foundation of nearly all food chains by creating organic matter that sustains other organisms. Without photosynthesis, the atmosphere would lack oxygen and most life forms would not survive."
+    "answer": "Photosynthesis is the biological process by which green plants, algae, and certain bacteria convert light energy, typically from the sun, into chemical energy stored in glucose, using carbon dioxide and water while releasing oxygen as a byproduct. It is essential for life on Earth because it forms the foundation of nearly all food chains, supplies the oxygen necessary for aerobic respiration, and regulates atmospheric carbon dioxide levels, thereby maintaining the planet's climate and supporting the survival of virtually all living organisms."
   },
   {
     "task_id": "h10",
-    "answer": "def merge(a, b):\n    result = []\n    i = j = 0\n    while i < len(a) and j < len(b):\n        if a[i] < b[j]:\n            result.append(a[i]); i += 1\n        else:\n            result.append(b[j]); j += 1\n    result.extend(a[i:])\n    result.extend(b[j:])\n    return result"
+    "answer": "```python\ndef merge(a, b):\n    result = []\n    i = j = 0\n    while i < len(a) and j < len(b):\n        if a[i] < b[j]:\n            result.append(a[i]); i += 1\n        else:\n            result.append(b[j]); j += 1\n    result.extend(a[i:])\n    result.extend(b[j:])\n    return result\n```"
   }
 ]

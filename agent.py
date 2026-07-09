@@ -8,8 +8,13 @@ from remote.fireworks_client import repondre_fireworks
 load_dotenv()
 
 def traiter_question(question: str) -> dict:
+    """
+    Picks the cheapest suitable Fireworks model for the task,
+    with a reasoning mode for math/logic tasks, then returns the answer.
+    """
     modele, mode = choisir_modele(question)
     reponse = repondre_fireworks(question, modele, mode)
+    
     return {
         "question": question,
         "modele_utilise": modele,

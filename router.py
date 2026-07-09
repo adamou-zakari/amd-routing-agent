@@ -1,10 +1,10 @@
 # router.py
 import os
-import re
 
 def _modeles_autorises() -> list:
     raw = os.environ.get("ALLOWED_MODELS", "")
     return [m.strip() for m in raw.split(",") if m.strip()]
+
 
 def est_tache_code(question: str) -> bool:
     mots_code = [
@@ -16,21 +16,9 @@ def est_tache_code(question: str) -> bool:
     q = question.lower()
     return any(mot in q for mot in mots_code)
 
-def est_tache_resume_contraint(question: str) -> bool:
-    """Détecte les résumés avec contrainte de mots."""
-    q = question.lower()
-    patterns = [
-        r"exactly\s+\d+\s+words",
-        r"in\s+\d+\s+words",
-        r"summarize",
-        r"condense",
-        r"brief summary",
-        r"one sentence"
-    ]
-    return any(re.search(p, q) for p in patterns)
 
 def est_tache_raisonnement(question: str) -> bool:
-    """Maths multi-étapes et puzzles logiques."""
+    """Maths multi-étapes et puzzles logiques : besoin de réflexion approfondie."""
     q = question.lower()
     mots_math = ["%", "percent", "calculate", "how many", "how much", "total",
                  "remain", "liters", "employees", "grew", "declined", "increase",
@@ -40,26 +28,22 @@ def est_tache_raisonnement(question: str) -> bool:
                     "immediately to", "next to", "logic"]
     return any(m in q for m in mots_math + mots_logique)
 
+
 def choisir_modele(question: str):
     """
-    Retourne (modele, mode) :
-    - 'code' → Kimi K2.7
-    - 'resume' → MiniMax avec instruction stricte
-    - 'raisonnement' → MiniMax avec gros budget
-    - 'standard' → MiniMax concis
+    Retourne (modele, mode) où mode est 'code', 'raisonnement' ou 'standard'.
+    Les IDs viennent de ALLOWED_MODELS (règle du hackathon).
     """
     modeles = _modeles_autorises()
-    
+
     def trouver(mots_cles, defaut):
         for m in modeles:
             if any(k in m.lower() for k in mots_cles):
                 return m
         return modeles[0] if modeles else defaut
-    
+
     if est_tache_code(question):
         return trouver(["kimi", "code"], "accounts/fireworks/models/kimi-k2p7-code"), "code"
-    if est_tache_resume_contraint(question):
-        return trouver(["minimax"], "accounts/fireworks/models/minimax-m3"), "resume"
     if est_tache_raisonnement(question):
         return trouver(["minimax"], "accounts/fireworks/models/minimax-m3"), "raisonnement"
     return trouver(["minimax"], "accounts/fireworks/models/minimax-m3"), "standard"
