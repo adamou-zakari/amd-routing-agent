@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 PREAMBULES = re.compile(
-    r"^(here (are|is)|sure[,!]?|certainly[,!]?)[^:\n]{0,60}:\s*",
+    r"^(here (are|is)|named entities( extracted)?|sure[,!]?|certainly[,!]?)[^:\n]{0,60}:\s*",
     re.IGNORECASE
 )
 
@@ -22,6 +22,15 @@ def _nettoyer_reponse(texte: str) -> str:
     if blocs:
         return blocs[0].strip()
     texte = PREAMBULES.sub("", texte).strip()
+
+    # Sortie NER : si le premier bloc est une liste 'Entité: Type',
+    # on supprime tout paragraphe explicatif qui suivrait.
+    ligne_entite = re.compile(r"^.{1,60}:\s*(Person|Organization|Location|Date)\s*$", re.IGNORECASE)
+    blocs_texte = texte.split("\n\n")
+    lignes = [l for l in blocs_texte[0].splitlines() if l.strip()]
+    if len(lignes) >= 2 and all(ligne_entite.match(l.strip()) for l in lignes):
+        return blocs_texte[0].strip()
+
     return texte
 
 def _appel_api(url, headers, payload):
@@ -46,12 +55,13 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
         "You are an evaluation agent. Always answer in English, in plain text only (no markdown, no asterisks, no bullet points). "
         "Be concise but COMPLETE: answer exactly what the task asks, nothing more. Never add introductions like 'Here are'. "
         "If the task asks to explain, justify, or describe how something works, include a brief 1-2 sentence explanation. "
-        "For sentiment classification: give the label (Positive, Negative, Neutral, or Mixed) followed by a one-sentence justification. "
+        "For sentiment classification: choose among Positive, Negative, Neutral, or Mixed, then give one short justification. Purely factual or descriptive statements with no emotional language are Neutral, not Positive. "
         "For math word problems: solve carefully, verify your arithmetic, and give the final numeric answer with a brief explanation. "
-        "For named entity recognition: list each entity with its type, nothing else. "
+        "For named entity recognition: output ONLY the list of entities with their types (Person, Organization, Location, Date), one per line, format 'Entity: Type'. No introduction, no explanation, no numbering. Temporal expressions like 'last March' or 'two years ago' count as Date entities. "
         "For code debugging: briefly state what the bug is, then provide the complete corrected code. "
         "For code generation: provide the complete working code only. "
         "For summaries with a word limit: write ONE grammatical summary of exactly that length, then stop. Never count out loud, never show drafts. "
+        "For summaries in one sentence: one clear, reasonably short sentence. "
         "Never invent information."
     )
 
@@ -87,7 +97,6 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
                 if tentative < 2:
                     payload["max_tokens"] = min(payload["max_tokens"] * 2 + 1000, 6000)
                     continue
-                # Dernier recours : extraire une réponse du raisonnement
                 contenu = dernier_raisonnement
                 if not contenu.strip():
                     return "[ERROR] Empty model response"
