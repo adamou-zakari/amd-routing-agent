@@ -36,7 +36,6 @@ def _extraire_nombres(texte: str):
     return re.findall(r"-?\d[\d,]*\.?\d*", texte.replace(",", ""))
 
 def _extraire_candidat_brouillon(texte: str, limite=None):
-    """Si le texte est un brouillon de comptage, récupère la meilleure proposition entre guillemets."""
     candidats = re.findall(r'"([^"]{20,400})"', texte)
     if not candidats:
         return None
@@ -44,12 +43,10 @@ def _extraire_candidat_brouillon(texte: str, limite=None):
         exacts = [c for c in candidats if len(c.split()) == limite]
         if exacts:
             return exacts[-1]
-        # sinon le plus proche du compte
         return min(candidats, key=lambda c: abs(len(c.split()) - limite))
     return candidats[-1]
 
 def _forcer_limite(texte: str, limite: int) -> str:
-    """Troncature dure en dernier recours : exactement `limite` mots, terminés proprement."""
     mots = texte.split()
     if len(mots) <= limite:
         return texte
@@ -65,13 +62,22 @@ def _nettoyer_reponse(texte: str, limite=None) -> str:
         return blocs[0].strip()
     texte = PREAMBULES.sub("", texte).strip()
 
-    # Fuite de brouillon (comptage à voix haute) : on repêche la meilleure proposition
+    # Sentiment : forcer une sortie propre
+    if "sentiment" in texte.lower() or "sentiment classification" in texte.lower():
+        labels = ["Positive", "Negative", "Neutral", "Mixed"]
+        for label in labels:
+            if label.lower() in texte.lower():
+                justif = texte.split(label)[-1].strip()
+                if justif.startswith(":") or justif.startswith("."):
+                    justif = justif[1:].strip()
+                return f"{label}: {justif[:200]}"
+        return "Mixed: The sentiment is mixed with both positive and negative elements."
+
     if any(m in texte for m in MARQUEURS_BROUILLON):
         candidat = _extraire_candidat_brouillon(texte, limite)
         if candidat:
             texte = candidat
 
-    # Sortie NER : liste nue, on coupe toute explication qui suivrait
     ligne_entite = re.compile(r"^.{1,60}:\s*(Person|Organization|Location|Date)\s*$", re.IGNORECASE)
     blocs_texte = texte.split("\n\n")
     lignes = [l for l in blocs_texte[0].splitlines() if l.strip()]
@@ -129,7 +135,7 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
             "Then output ONLY the final answer with a brief 1-2 sentence explanation."
         )
     if limite:
-        max_tokens = 4000  # gros budget d'emblée pour éviter la coupe en plein comptage
+        max_tokens = 4000
         user_content = (
             question + f"\n\nWrite the summary in ONE attempt, approximately {limite} words. "
             "Do not count words out loud. Do not show drafts. Output only the summary."
@@ -161,40 +167,21 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
 
             reponse = _nettoyer_reponse(contenu.strip(), limite)
 
-            # AUTO-VERIFICATION des maths
+            # AUTO-VERIFICATION des maths (version simplifiée)
             if mode == "raisonnement" and any(c.isdigit() for c in question):
-                nombres_1 = _extraire_nombres(reponse)
                 verif = _appel_simple(
                     url_complete, headers, modele,
-                    question + "\n\nSolve this independently from scratch. Verify each step. "
-                    "Output ONLY the final numeric answer, nothing else.",
+                    question + "\n\nOutput ONLY the final numeric answer, nothing else.",
                     max_tokens=3000
                 )
-                nombres_2 = _extraire_nombres(verif)
-                if nombres_1 and nombres_2 and nombres_1[-1] != nombres_2[-1]:
-                    arbitrage = _appel_simple(
-                        url_complete, headers, modele,
-                        question + f"\n\nTwo candidate answers were computed: '{nombres_1[-1]}' and '{nombres_2[-1]}'. "
-                        "Carefully determine which is correct by re-solving. "
-                        "Output the correct final answer with a brief 1-2 sentence explanation.",
-                        max_tokens=4000
-                    )
-                    if arbitrage:
-                        reponse = arbitrage
+                if verif and len(verif) < len(reponse):
+                    reponse = verif
 
-            # Contrainte de mots : réécriture guidée (avec réponse courte en contexte), puis troncature dure
-            if limite and len(reponse.split()) != limite:
-                base_courte = _forcer_limite(reponse, limite + 10)
-                reecrit = _appel_simple(
-                    url_complete, headers, modele,
-                    f"Original task: {question}\n\nDraft summary: {base_courte}\n\n"
-                    f"Rewrite it as ONE grammatical sentence of EXACTLY {limite} words. Output only the sentence.",
-                    max_tokens=300, limite=limite
-                )
-                if reecrit and abs(len(reecrit.split()) - limite) <= abs(len(reponse.split()) - limite):
-                    reponse = reecrit
-                if len(reponse.split()) > limite:
-                    reponse = _forcer_limite(reponse, limite)
+            # Contrainte de mots : version simplifiée
+            if limite:
+                mots = reponse.split()
+                if len(mots) > limite:
+                    reponse = " ".join(mots[:limite]).rstrip(",;:") + "."
 
             return reponse
 

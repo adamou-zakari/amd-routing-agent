@@ -1,35 +1,35 @@
 [
   {
     "task_id": "g1",
-    "answer": "A blockchain achieves consensus without a central authority by having distributed nodes agree on the validity of transactions through a protocol such as Proof of Work or Proof of Stake, where participants follow cryptographic rules and economic incentives to collectively validate and append new blocks to a shared ledger."
+    "answer": "A blockchain achieves consensus without a central authority by having all participants agree on the validity of transactions through a shared protocol. When a new transaction occurs, it is broadcast to a distributed network of nodes that independently verify it against the rules of the system. These verified transactions are grouped into blocks, and nodes compete to add the next block to the chain using a consensus mechanism such as Proof of Work, where miners solve computational puzzles, or Proof of Stake, where validators are chosen based on the amount of currency they hold and are willing to lock up. Once a block is accepted by the majority of nodes, it becomes part of an immutable, shared ledger, and any attempt to alter it would require controlling more than half of the network's power or stake, which is economically and computationally impractical. This combination of decentralization, cryptographic verification, and economic incentives allows the network to maintain a single, trustworthy source of truth without relying on any trusted intermediary."
   },
   {
     "task_id": "g2",
-    "answer": "Weather refers to the short-term atmospheric conditions\u2014such as temperature, precipitation, humidity, and wind\u2014at a specific time and place, typically over hours or days. Climate, by contrast, is the long-term average of those weather patterns in a given region, usually measured over 30 years or more, so it describes what is generally expected rather than what is happening on any given day."
+    "answer": "Weather refers to the short-term atmospheric conditions\u2014such as temperature, precipitation, humidity, and wind\u2014at a specific time and place, typically observed over hours or days. Climate, by contrast, is the long-term average of those weather patterns in a given region, usually calculated over 30 years or more. A common saying captures the distinction: climate is what you expect, while weather is what you get on any given day."
   },
   {
     "task_id": "g3",
-    "answer": "The correct answer is 8089.92.\n\nAfter year 1: 8000 \u00d7 1.06 = 8480. After year 2: 8480 \u00d7 1.06 = 8988.80. After year 3: 8988.80 \u00d7 0.90 = 8089.92. The answer \"3.\" is incorrect and appears to be a truncated or erroneous response."
+    "answer": "8089.92"
   },
   {
     "task_id": "g4",
-    "answer": "4.5 hours. The first segment takes 180/90 = 2 hours, the stop adds 0.5 hours, and the second segment takes 120/60 = 2 hours, totaling 4.5 hours."
+    "answer": "4.5"
   },
   {
     "task_id": "g5",
-    "answer": "Mixed. The review contains both positive elements (features work flawlessly, responsive support, daily usage indicating reliance) and a negative element (occasional crashes), so the overall sentiment is mixed rather than purely positive or negative."
+    "answer": "Positive: Mixed. The review contains both positive elements (features work flawlessly, responsive support) and a negative element (occasional crashes), so the sentiment is not uniformly positive or negative."
   },
   {
     "task_id": "g6",
-    "answer": "Negative. The reviewer expresses strong dissatisfaction with the product breaking quickly and frustration with the seller's refusal to provide a refund."
+    "answer": "Negative. The reviewer uses strong negative language (\"Worst purchase I have ever made\"), reports a product failure (\"Broke within a week\"), and complains about poor customer service (\"seller refuses any refund\")."
   },
   {
     "task_id": "g7",
-    "answer": "[ERROR] Fireworks connection failed: HTTPSConnectionPool(host='api.fireworks.ai', port=443): Read timed out. (read timeout=30)"
+    "answer": "Remote work reshaped commercial real estate, driving office downsizing and repurposing into residential mixed-use developments."
   },
   {
     "task_id": "g8",
-    "answer": "Volunteers cleared two tons of plastic waste from the riverbank during a six-hour effort, earning praise from local officials who promised to install recycling bins."
+    "answer": "Volunteers cleared two tons of plastic waste from the riverbank in a single day, earning praise from local officials who promised to install recycling bins."
   },
   {
     "task_id": "g9",
@@ -41,26 +41,26 @@
   },
   {
     "task_id": "g11",
-    "answer": "The condition `n % 2 == 1` filters for odd numbers; change it to `n % 2 == 0` to keep even numbers.\n\ndef get_evens(nums):\n    return [n for n in nums if n % 2 == 0]"
+    "answer": "The condition `n % 2 == 1` selects odd numbers; change it to `n % 2 == 0` to select even numbers.\n\ndef get_evens(nums):\n    return [n for n in nums if n % 2 == 0]"
   },
   {
     "task_id": "g12",
-    "answer": "The bug is a missing base case for n = 0 (and no guard against negatives), so inputs less than or equal to 0 recurse forever.\n\ndef factorial(n):\n    if n < 0:\n        raise ValueError(\"Factorial is not defined for negative numbers\")\n    if n == 0:\n        return 1\n    return n * factorial(n - 1)"
+    "answer": "The base case only catches n == 1, so calling the function with 0 or a negative number causes infinite recursion. Add a base case for 0 and reject negative inputs.\n\ndef factorial(n):\n    if n < 0:\n        raise ValueError(\"factorial is not defined for negative numbers\")\n    if n == 0 or n == 1:\n        return 1\n    return n * factorial(n - 1)"
   },
   {
     "task_id": "g13",
-    "answer": "Ada speaks Swahili, Bo speaks Hausa, Cy speaks Arabic, Dee speaks French. Since Bo is assigned Hausa, Dee (who cannot speak Swahili or Arabic) must speak French, which forces Ada (who cannot speak French or Arabic) to speak Swahili, leaving Cy with Arabic."
+    "answer": "Ada speaks Swahili, Bo speaks Hausa, Cy speaks Arabic, and Dee speaks French. Since Bo is assigned Hausa, Dee must take French (the only remaining option for her), which forces Ada to Swahili and leaves Cy with Arabic."
   },
   {
     "task_id": "g14",
-    "answer": "14 chickens and 8 goats.\n\nLet c = chickens and g = goats. From c + g = 22 and 2c + 4g = 60, substituting gives 2(22 \u2212 g) + 4g = 60, so 2g = 16, meaning g = 8 and c = 14. The candidate answer \"8\" alone only gives the goat count and is incomplete, while \"22\" is just the total animal count and does not answer the question."
+    "answer": "14 chickens and 8 goats"
   },
   {
     "task_id": "g15",
-    "answer": "def is_palindrome(s):\n    cleaned = ''.join(c.lower() for c in s if c.isalnum())\n    return cleaned == cleaned[::-1]"
+    "answer": "def is_palindrome(s):\n    cleaned = \"\"\n    for c in s:\n        if c.isalnum():\n            cleaned += c.lower()\n    return cleaned == cleaned[::-1]"
   },
   {
     "task_id": "g16",
-    "answer": "def fizzbuzz(n):\n    result = []\n    for i in range(1, n + 1):\n        if i % 3 == 0 and i % 5 == 0:\n            result.append(\"FizzBuzz\")\n        elif i % 3 == 0:\n            result.append(\"Fizz\")\n        elif i % 5 == 0:\n            result.append(\"Buzz\")\n        else:\n            result.append(str(i))\n    return result"
+    "answer": "def fizzbuzz(n):\n    result = []\n    for i in range(1, n + 1):\n        if i % 15 == 0:\n            result.append('FizzBuzz')\n        elif i % 3 == 0:\n            result.append('Fizz')\n        elif i % 5 == 0:\n            result.append('Buzz')\n        else:\n            result.append(str(i))\n    return result"
   }
 ]
