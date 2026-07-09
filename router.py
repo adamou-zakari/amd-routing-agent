@@ -21,18 +21,18 @@ def est_tache_raisonnement(question: str) -> bool:
     """Maths multi-étapes et puzzles logiques : besoin de réflexion approfondie."""
     q = question.lower()
     mots_math = ["%", "percent", "calculate", "how many", "how much", "total",
-                 "remain", "liters", "employees", "grew", "declined", "increase",
-                 "decrease", "price", "cost", "sum", "average", "rate", "per "]
-    mots_logique = ["sits in", "seat", "each own", "who owns", "taller than",
-                    "older than", "constraint", "puzzle", "deduce", "must be",
-                    "immediately to", "next to", "logic"]
+                 "remain", "liters", "grew", "declined", "increase", "decrease",
+                 "price", "cost", "sum", "average", "rate", "years", "per "]
+    mots_logique = ["sits in", "seat", "each own", "who owns", "taller", "older",
+                    "shorter", "younger", "constraint", "puzzle", "deduce",
+                    "must be", "immediately", "next to", "logic", "exactly one"]
     return any(m in q for m in mots_math + mots_logique)
 
 
 def choisir_modele(question: str):
     """
-    Retourne (modele, mode) où mode est 'code', 'raisonnement' ou 'standard'.
-    Les IDs viennent de ALLOWED_MODELS (règle du hackathon).
+    Retourne (modele, mode) : mode = 'code', 'raisonnement' ou 'standard'.
+    IDs lus depuis ALLOWED_MODELS (règle du hackathon), fallback local sinon.
     """
     modeles = _modeles_autorises()
 
