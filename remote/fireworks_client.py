@@ -14,29 +14,22 @@ PREAMBULES = re.compile(
 
 MARQUEURS_BROUILLON = ("Let me count", "Let me try", "Let me craft", "Try:", "Count:", "The user wants", "That's too many", "words. Still", "words. Too")
 
+MOTS_ORPHELINS = {"and", "or", "the", "a", "an", "of", "into", "with", "to", "for", "as", "by", "in", "on", "at", "but"}
+
 SYSTEM_PROMPT = (
-    "You are an evaluation agent. Always answer in English, in plain text only (no markdown, no asterisks, no bullet points). "
-    "Be concise but COMPLETE: answer exactly what the task asks, nothing more. Never add introductions like 'Here are'. "
-    "If the task asks to explain, justify, or describe how something works, include a brief 1-2 sentence explanation. "
-    "For sentiment classification: choose among Positive, Negative, Neutral, or Mixed, then give one short justification. Purely factual or descriptive statements with no emotional language are Neutral, not Positive. "
-    "For math word problems: solve carefully, verify your arithmetic, and give the final numeric answer with a brief explanation. "
-    "For named entity recognition: output ONLY the list of entities with their types (Person, Organization, Location, Date), one per line, format 'Entity: Type'. No introduction, no explanation, no numbering. Temporal expressions like 'last March' or 'two years ago' count as Date entities. "
-    "For code debugging: briefly state what the bug is, then provide the complete corrected code. "
-    "For code generation: provide the complete working code only. "
-    "For summaries with a word limit: write ONE grammatical summary of approximately that length in a single attempt, then stop immediately. Never count words out loud, never revise, never show drafts. "
-    "For summaries in one sentence: one clear, reasonably short sentence. "
-    "Never invent information."
+    "Answer in English, plain text, no markdown. Correct final answer only, brief. "
+    "Sentiment (ONLY when the task explicitly asks to classify sentiment): one label (Positive/Negative/Neutral/Mixed) + short reason; factual text is Neutral. "
+    "Math/logic: check silently, answer + one-line explanation. "
+    "NER: only 'Entity: Type' lines (Person/Organization/Location/Date); relative dates are Dates. "
+    "Debug: bug in one line, then corrected code. Codegen: code only. "
+    "Word-limited summary: one attempt, never count aloud."
 )
 
 def _contrainte_mots(question: str):
     m = re.search(r"(?:exactly|in)\s+(\d+)\s+words", question, re.IGNORECASE)
     return int(m.group(1)) if m else None
 
-def _extraire_nombres(texte: str):
-    return re.findall(r"-?\d[\d,]*\.?\d*", texte.replace(",", ""))
-
 def _extraire_candidat_brouillon(texte: str, limite=None):
-    """Si le texte est un brouillon de comptage, récupère la meilleure proposition entre guillemets."""
     candidats = re.findall(r'"([^"]{20,400})"', texte)
     if not candidats:
         return None
@@ -44,16 +37,19 @@ def _extraire_candidat_brouillon(texte: str, limite=None):
         exacts = [c for c in candidats if len(c.split()) == limite]
         if exacts:
             return exacts[-1]
-        # sinon le plus proche du compte
         return min(candidats, key=lambda c: abs(len(c.split()) - limite))
     return candidats[-1]
 
 def _forcer_limite(texte: str, limite: int) -> str:
-    """Troncature dure en dernier recours : exactement `limite` mots, terminés proprement."""
+    """Troncature intelligente : coupe à `limite` mots max, puis retire les
+    mots orphelins finaux (and, into, of...) pour garder une phrase propre."""
     mots = texte.split()
     if len(mots) <= limite:
         return texte
-    coupe = " ".join(mots[:limite]).rstrip(",;:—-")
+    mots = mots[:limite]
+    while mots and mots[-1].strip(",;:.").lower() in MOTS_ORPHELINS:
+        mots.pop()
+    coupe = " ".join(mots).rstrip(",;:—-")
     if not coupe.endswith("."):
         coupe += "."
     return coupe
@@ -65,13 +61,11 @@ def _nettoyer_reponse(texte: str, limite=None) -> str:
         return blocs[0].strip()
     texte = PREAMBULES.sub("", texte).strip()
 
-    # Fuite de brouillon (comptage à voix haute) : on repêche la meilleure proposition
     if any(m in texte for m in MARQUEURS_BROUILLON):
         candidat = _extraire_candidat_brouillon(texte, limite)
         if candidat:
             texte = candidat
 
-    # Sortie NER : liste nue, on coupe toute explication qui suivrait
     ligne_entite = re.compile(r"^.{1,60}:\s*(Person|Organization|Location|Date)\s*$", re.IGNORECASE)
     blocs_texte = texte.split("\n\n")
     lignes = [l for l in blocs_texte[0].splitlines() if l.strip()]
@@ -85,26 +79,6 @@ def _appel_api(url, headers, payload):
     reponse.raise_for_status()
     message = reponse.json()["choices"][0].get("message", {})
     return message.get("content") or "", message.get("reasoning_content") or ""
-
-def _appel_simple(url, headers, modele, user_content, max_tokens=2000, limite=None):
-    payload = {
-        "model": modele,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_content}
-        ],
-        "max_tokens": max_tokens,
-        "temperature": 0
-    }
-    for tentative in range(2):
-        try:
-            contenu, _ = _appel_api(url, headers, payload)
-            if contenu.strip():
-                return _nettoyer_reponse(contenu.strip(), limite)
-            payload["max_tokens"] = min(payload["max_tokens"] * 2 + 1000, 6000)
-        except Exception:
-            continue
-    return ""
 
 def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> str:
     api_key = os.environ.get("FIREWORKS_API_KEY")
@@ -120,26 +94,17 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
     url_complete = f"{base_url}/v1/chat/completions"
     limite = _contrainte_mots(question)
 
-    user_content = question
-    max_tokens = 1500
+    max_tokens = 900
     if mode == "raisonnement":
-        max_tokens = 3000
-        user_content = (
-            question + "\n\nSolve step by step internally and verify your arithmetic or logic. "
-            "Then output ONLY the final answer with a brief 1-2 sentence explanation."
-        )
+        max_tokens = 2000
     if limite:
-        max_tokens = 4000  # gros budget d'emblée pour éviter la coupe en plein comptage
-        user_content = (
-            question + f"\n\nWrite the summary in ONE attempt, approximately {limite} words. "
-            "Do not count words out loud. Do not show drafts. Output only the summary."
-        )
+        max_tokens = 2500
 
     payload = {
         "model": modele,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_content}
+            {"role": "user", "content": question}
         ],
         "max_tokens": max_tokens,
         "temperature": 0
@@ -153,7 +118,7 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
 
             if not contenu.strip():
                 if tentative < 2:
-                    payload["max_tokens"] = min(payload["max_tokens"] * 2 + 1000, 6000)
+                    payload["max_tokens"] = min(payload["max_tokens"] * 2, 5000)
                     continue
                 contenu = dernier_raisonnement
                 if not contenu.strip():
@@ -161,38 +126,23 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
 
             reponse = _nettoyer_reponse(contenu.strip(), limite)
 
-            # AUTO-VERIFICATION des maths
-            if mode == "raisonnement" and any(c.isdigit() for c in question):
-                nombres_1 = _extraire_nombres(reponse)
-                verif = _appel_simple(
-                    url_complete, headers, modele,
-                    question + "\n\nSolve this independently from scratch. Verify each step. "
-                    "Output ONLY the final numeric answer, nothing else.",
-                    max_tokens=3000
-                )
-                nombres_2 = _extraire_nombres(verif)
-                if nombres_1 and nombres_2 and nombres_1[-1] != nombres_2[-1]:
-                    arbitrage = _appel_simple(
-                        url_complete, headers, modele,
-                        question + f"\n\nTwo candidate answers were computed: '{nombres_1[-1]}' and '{nombres_2[-1]}'. "
-                        "Carefully determine which is correct by re-solving. "
-                        "Output the correct final answer with a brief 1-2 sentence explanation.",
-                        max_tokens=4000
-                    )
-                    if arbitrage:
-                        reponse = arbitrage
-
-            # Contrainte de mots : réécriture guidée (avec réponse courte en contexte), puis troncature dure
             if limite and len(reponse.split()) != limite:
-                base_courte = _forcer_limite(reponse, limite + 10)
-                reecrit = _appel_simple(
-                    url_complete, headers, modele,
-                    f"Original task: {question}\n\nDraft summary: {base_courte}\n\n"
-                    f"Rewrite it as ONE grammatical sentence of EXACTLY {limite} words. Output only the sentence.",
-                    max_tokens=300, limite=limite
-                )
-                if reecrit and abs(len(reecrit.split()) - limite) <= abs(len(reponse.split()) - limite):
-                    reponse = reecrit
+                correction = {
+                    "model": modele,
+                    "messages": [
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": f"Task: {question}\n\nDraft: {_forcer_limite(reponse, limite + 10)}\n\nRewrite as ONE complete grammatical sentence of EXACTLY {limite} words. Output only the sentence."}
+                    ],
+                    "max_tokens": 150,
+                    "temperature": 0
+                }
+                try:
+                    c2, _ = _appel_api(url_complete, headers, correction)
+                    reecrit = _nettoyer_reponse(c2.strip(), limite)
+                    if reecrit and abs(len(reecrit.split()) - limite) <= abs(len(reponse.split()) - limite):
+                        reponse = reecrit
+                except Exception:
+                    pass
                 if len(reponse.split()) > limite:
                     reponse = _forcer_limite(reponse, limite)
 
