@@ -22,7 +22,7 @@ SYSTEM_PROMPT = (
     "Math/logic: check silently, answer + one-line explanation. "
     "NER: only 'Entity: Type' lines (Person/Organization/Location/Date); relative dates are Dates. "
     "Debug: bug in one line, then corrected code. Codegen: code only. "
-    "Word-limited summary: one attempt, never count aloud."
+    "Word-limited summary: write it in ONE attempt, never count aloud, never show drafts."
 )
 
 def _contrainte_mots(question: str):
@@ -41,8 +41,6 @@ def _extraire_candidat_brouillon(texte: str, limite=None):
     return candidats[-1]
 
 def _forcer_limite(texte: str, limite: int) -> str:
-    """Troncature intelligente : coupe à `limite` mots max, puis retire les
-    mots orphelins finaux (and, into, of...) pour garder une phrase propre."""
     mots = texte.split()
     if len(mots) <= limite:
         return texte
@@ -98,7 +96,7 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
     if mode == "raisonnement":
         max_tokens = 2000
     if limite:
-        max_tokens = 2500
+        max_tokens = 400  # contrainte de mots : coupe la boucle de comptage (économie majeure)
 
     payload = {
         "model": modele,
