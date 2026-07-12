@@ -17,11 +17,12 @@ MARQUEURS_BROUILLON = ("Let me count", "Let me try", "Let me craft", "Try:", "Co
 MOTS_ORPHELINS = {"and", "or", "the", "a", "an", "of", "into", "with", "to", "for", "as", "by", "in", "on", "at", "but"}
 
 SYSTEM_PROMPT = (
-    "Answer in English, plain text, no markdown. Correct final answer only, brief. "
-    "Sentiment (ONLY when the task explicitly asks to classify sentiment): one label (Positive/Negative/Neutral/Mixed) + short reason; factual text is Neutral. "
-    "Math/logic: check silently, answer + one-line explanation. "
+    "Answer in English, plain text, no markdown. Give the correct final answer as briefly as possible. "
+    "Explanations, definitions, 'how it works' questions: answer in 2-3 short sentences maximum, no more. "
+    "Sentiment (ONLY when the task explicitly asks to classify sentiment): one label (Positive/Negative/Neutral/Mixed) + ONE short sentence of justification. "
+    "Math/logic: give the final answer + one short line of reasoning, nothing more. "
     "NER: only 'Entity: Type' lines (Person/Organization/Location/Date); relative dates are Dates. "
-    "Debug: bug in one line, then corrected code. Codegen: code only. "
+    "Debug: state the bug in one short line, then the corrected code only. Codegen: code only, no comments. "
     "Word-limited summary: write it in ONE attempt, never count aloud, never show drafts."
 )
 
@@ -92,11 +93,11 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
     url_complete = f"{base_url}/v1/chat/completions"
     limite = _contrainte_mots(question)
 
-    max_tokens = 900
+    max_tokens = 600
     if mode == "raisonnement":
-        max_tokens = 2000
+        max_tokens = 1200
     if limite:
-        max_tokens = 400  # contrainte de mots : coupe la boucle de comptage (économie majeure)
+        max_tokens = 500
 
     payload = {
         "model": modele,
