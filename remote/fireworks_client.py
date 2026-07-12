@@ -17,13 +17,12 @@ MARQUEURS_BROUILLON = ("Let me count", "Let me try", "Let me craft", "Try:", "Co
 MOTS_ORPHELINS = {"and", "or", "the", "a", "an", "of", "into", "with", "to", "for", "as", "by", "in", "on", "at", "but"}
 
 SYSTEM_PROMPT = (
-    "Answer in English, plain text, no markdown. Give the correct final answer as briefly as possible. "
-    "Explanations, definitions, 'how it works' questions: answer in 2-3 short sentences maximum, no more. "
-    "Sentiment (ONLY when the task explicitly asks to classify sentiment): one label (Positive/Negative/Neutral/Mixed) + ONE short sentence of justification. "
-    "Math/logic: give the final answer + one short line of reasoning, nothing more. "
+    "Answer in English, plain text, no markdown. Correct final answer only, brief. "
+    "Sentiment (ONLY when the task explicitly asks to classify sentiment): one label (Positive/Negative/Neutral/Mixed) + short reason; factual text is Neutral. "
+    "Math/logic: check silently, answer + one-line explanation. "
     "NER: only 'Entity: Type' lines (Person/Organization/Location/Date); relative dates are Dates. "
-    "Debug: state the bug in one short line, then the corrected code only. Codegen: code only, no comments. "
-    "Word-limited summary: write it in ONE attempt, never count aloud, never show drafts."
+    "Debug: bug in one line, then corrected code. Codegen: code only. "
+    "Word-limited summary: write EXACTLY the requested number of words in ONE attempt. Count carefully before answering, never show drafts, never count aloud."
 )
 
 def _contrainte_mots(question: str):
@@ -93,11 +92,11 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
     url_complete = f"{base_url}/v1/chat/completions"
     limite = _contrainte_mots(question)
 
-    max_tokens = 600
+    max_tokens = 900
     if mode == "raisonnement":
-        max_tokens = 1200
+        max_tokens = 2000
     if limite:
-        max_tokens = 500
+        max_tokens = 2500
 
     payload = {
         "model": modele,
@@ -117,7 +116,7 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
 
             if not contenu.strip():
                 if tentative < 2:
-                    payload["max_tokens"] = min(payload["max_tokens"] * 2, 5000)
+                    payload["max_tokens"] = min(payload["max_tokens"] * 2, 6000)
                     continue
                 contenu = dernier_raisonnement
                 if not contenu.strip():
@@ -125,25 +124,9 @@ def repondre_fireworks(question: str, modele: str, mode: str = "standard") -> st
 
             reponse = _nettoyer_reponse(contenu.strip(), limite)
 
-            if limite and len(reponse.split()) != limite:
-                correction = {
-                    "model": modele,
-                    "messages": [
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": f"Task: {question}\n\nDraft: {_forcer_limite(reponse, limite + 10)}\n\nRewrite as ONE complete grammatical sentence of EXACTLY {limite} words. Output only the sentence."}
-                    ],
-                    "max_tokens": 150,
-                    "temperature": 0
-                }
-                try:
-                    c2, _ = _appel_api(url_complete, headers, correction)
-                    reecrit = _nettoyer_reponse(c2.strip(), limite)
-                    if reecrit and abs(len(reecrit.split()) - limite) <= abs(len(reponse.split()) - limite):
-                        reponse = reecrit
-                except Exception:
-                    pass
-                if len(reponse.split()) > limite:
-                    reponse = _forcer_limite(reponse, limite)
+            # PLUS DE 2e APPEL API : troncature locale gratuite uniquement
+            if limite and len(reponse.split()) > limite:
+                reponse = _forcer_limite(reponse, limite)
 
             return reponse
 
